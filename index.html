@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Coco Login</title>
+</head>
+
+<body style="text-align:center; font-family:Arial">
+
+<h2>🔐 Coco Login</h2>
+
+<input id="email" placeholder="Email"><br><br>
+<input id="password" type="password" placeholder="Password"><br><br>
+
+<button onclick="signup()">Signup</button>
+<button onclick="login()">Login</button>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword }
+from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+import { getFirestore, doc, setDoc }
+from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+// 🔥 Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyDpGEQBE40nuW1OtkQ1co62gqJMn0Fvoww",
+  authDomain: "coco-audio-live.firebaseapp.com",
+  projectId: "coco-audio-live",
+  storageBucket: "coco-audio-live.firebasestorage.app",
+  messagingSenderId: "19697046627",
+  appId: "1:19697046627:web:9e1ff6d466073784791456"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// ✅ Signup
+window.signup = async function () {
+  let email = document.getElementById("email").value;
+  let pass = document.getElementById("password").value;
+
+  if (!email || !pass) {
+    alert("Fill all fields!");
+    return;
+  }
+
+  let userCred = await createUserWithEmailAndPassword(auth, email, pass);
+
+  // save user data
+  await setDoc(doc(db, "users", userCred.user.uid), {
+    email: email,
+    coin: 0,
+    vip: false,
+    name: "User"
+  });
+
+  alert("Signup success 🎉");
+};
+
+// ✅ Login
+window.login = async function () {
+  let email = document.getElementById("email").value;
+  let pass = document.getElementById("password").value;
+
+  if (!email || !pass) {
+    alert("Fill all fields!");
+    return;
+  }
+
+  await signInWithEmailAndPassword(auth, email, pass);
+
+  alert("Login success ✅");
+
+  // 👉 Home page သွား
+  window.location.href = "home.html";
+};
+</script>
+
+</body>
+</html>
