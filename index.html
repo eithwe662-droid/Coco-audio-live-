@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Coco Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+
+    .login-box {
+      backdrop-filter: blur(15px);
+      background: rgba(255,255,255,0.15);
+      padding: 40px;
+      width: 90%;
+      max-width: 400px;
+      border-radius: 20px;
+      text-align: center;
+      color: white;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px;
+      margin: 12px 0;
+      border-radius: 12px;
+      border: none;
+      background: rgba(255,255,255,0.2);
+      color: white;
+    }
+
+    button {
+      width: 48%;
+      padding: 14px;
+      margin: 10px 1%;
+      border: none;
+      border-radius: 12px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .login { background: #00c6ff; }
+    .signup { background: orange; }
+
+    /* 🔄 Spinner */
+    .spinner {
+      display: none;
+      margin: 15px auto;
+      border: 4px solid #fff;
+      border-top: 4px solid transparent;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ✅ Success animation */
+    .success {
+      display: none;
+      font-size: 40px;
+      margin-top: 10px;
+      animation: pop 0.5s ease;
+    }
+
+    @keyframes pop {
+      from { transform: scale(0); }
+      to { transform: scale(1); }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="login-box">
+  <h2>🔐 Coco Login</h2>
+
+  <input id="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password">
+
+  <button class="signup" id="signupBtn">Signup</button>
+  <button class="login" id="loginBtn">Login</button>
+
+  <div class="spinner" id="spinner"></div>
+  <div class="success" id="success">✅</div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged }
+from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+import { getFirestore, doc, setDoc }
+from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDpGEQBE40nuW1OtkQ1co62gqJMn0Fvoww",
+  authDomain: "coco-audio-live.firebaseapp.com",
+  projectId: "coco-audio-live",
+  storageBucket: "coco-audio-live.firebasestorage.app",
+  messagingSenderId: "19697046627",
+  appId: "1:19697046627:web:9e1ff6d466073784791456"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const spinner = document.getElementById("spinner");
+const success = document.getElementById("success");
+
+// 🔁 Auto login
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    window.location.href = "home.html";
+  }
+});
+
+// Signup
+async function signup(){
+  try {
+    spinner.style.display = "block";
+
+    let email = document.getElementById("email").value;
+    let pass = document.getElementById("password").value;
+
+    if (!email || !pass) throw new Error("Fill all fields!");
+
+    let userCred = await createUserWithEmailAndPassword(auth, email, pass);
+
+    await setDoc(doc(db, "users", userCred.user.uid), {
+      email,
+      coin: 100,
+      vip: false
+    });
+
+    spinner.style.display = "none";
+    success.style.display = "block";
+
+    setTimeout(()=> location.reload(), 1500);
+
+  } catch(err){
+    spinner.style.display = "none";
+    alert(err.message);
+  }
+}
+
+// Login
+async function login(){
+  try {
+    spinner.style.display = "block";
+
+    let email = document.getElementById("email").value;
+    let pass = document.getElementById("password").value;
+
+    if (!email || !pass) throw new Error("Fill all fields!");
+
+    await signInWithEmailAndPassword(auth, email, pass);
+
+    spinner.style.display = "none";
+    success.style.display = "block";
+
+    setTimeout(()=> {
+      window.location.href = "home.html";
+    }, 1200);
+
+  } catch(err){
+    spinner.style.display = "none";
+    alert(err.message);
+  }
+}
+
+// Button events
+document.getElementById("loginBtn").addEventListener("click", login);
+document.getElementById("signupBtn").addEventListener("click", signup);
+
+</script>
+
+</body>
+</html>
